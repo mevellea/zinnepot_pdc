@@ -1,4 +1,6 @@
 import re
+from typing import List
+
 import pandas as pd
 from itk import parse_itk
 
@@ -6,9 +8,30 @@ MC_INPUT_FILE = r"H:\My Drive\3.PDC\Crop_planning_4.0_ Eng_MC1.xlsx"
 MC_SHEET_NAME = "Crop Chart"
 
 
+class CropTask:
+    def __init__(self, days, name):
+        self.days = days
+        self.name = name
+        self.weeks = int(float(self.days) / 7)
+        self.week_abs = 0
+
+    def update(self, grow_start):
+        self.week_abs = grow_start + self.weeks
+
+    def __str__(self):
+        return f'{self.name} {self.week_abs}'
+
+
+def check_dtm(dtm):
+    if dtm is None:
+        return None
+    return None
+
+
 class Crop:
 
     def __init__(self, **entries):
+        self._tasks: List[CropTask] = []
 
         for k, v in entries.items():
             try:
@@ -23,43 +46,38 @@ class Crop:
     def crop(self):
         return getattr(self, "Culture")
 
-    def check_dtm(self, dtm):
-        if dtm is None:
-            return None
-
     def __str__(self):
         val = f"{self.crop} "
         return val
 
+    def transform_tasks(self):
+        attrs = list(vars(self).keys())
+        new_attrs = {}
+        to_delete = []
 
-def transform_tasks(crop_obj):
-    attrs = list(vars(crop_obj).keys())
-    new_attrs = {}
-    to_delete = []
+        for key in attrs:
+            m = re.match(r"Tâche (\d+)", key)
+            if m:
+                i = m.group(1)
 
-    for key in attrs:
-        m = re.match(r"Tâche (\d+)", key)
-        if m:
-            i = m.group(1)
+                task = getattr(self, key)
+                days_key = f"# jours {i}"
 
-            task = getattr(crop_obj, key)
-            days_key = f"# jours {i}"
+                if hasattr(self, days_key):
+                    days = getattr(self, days_key)
+                    if days != "" and task not in ["NS", "TR", "DS"]:
+                        days_int = int(float(days))
+                        new_key = f"Tâche J={days_int}"
+                        new_attrs[new_key] = task
+                        self._tasks.append(CropTask(days_int, task))
 
-            if hasattr(crop_obj, days_key):
-                days = getattr(crop_obj, days_key)
-                if days != "":
-                    new_key = f"Tâche J={int(float(days))}"
-                    new_attrs[new_key] = task
+                    to_delete.extend([key, days_key])
 
-                to_delete.extend([key, days_key])
+        for k, v in new_attrs.items():
+            setattr(self, k, v)
 
-    for k, v in new_attrs.items():
-        setattr(crop_obj, k, v)
-
-    for k in to_delete:
-        delattr(crop_obj, k)
-
-    return crop_obj
+        for k in to_delete:
+            delattr(self, k)
 
 
 def load_crops():
@@ -90,7 +108,7 @@ def load_crops():
         else:
             print(f"  # {crop_value} not found in ITK database")
 
-        new_crop = transform_tasks(new_crop)
+        new_crop.transform_tasks()
         crops.append(new_crop)
 
     print(f"{len(crops)} crops loaded")

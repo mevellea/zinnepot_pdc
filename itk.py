@@ -77,7 +77,7 @@ def parse_workbook(path: str) -> list[dict]:
     all_crops: list[dict] = []
     for idx, sheet_name in enumerate(wb.sheetnames):
         if idx > 7:
-             all_crops.extend(parse_sheet(wb[sheet_name]))
+            all_crops.extend(parse_sheet(wb[sheet_name]))
     return all_crops
 
 
