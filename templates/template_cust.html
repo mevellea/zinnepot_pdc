@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Clients</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #eef6ff;
+    margin: 0;
+    padding: 10px;
+}
+
+#search {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 15px;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.card h3 {
+    margin-top: 0;
+    color: #2a5d9f;
+}
+
+.field {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.label {
+    font-weight: bold;
+}
+.cols {
+    display: flex;
+    gap: 10px;
+}
+
+.col {
+    flex: 1;
+}
+</style>
+
+</head>
+<body>
+
+<input type="text" id="search" placeholder="🔍 Filtrer...">
+
+<div class="container" id="cards"></div>
+
+<script>
+const data = {{ json_data | safe }};
+
+data.sort((a, b) => {
+    const nameA = (a.name || "").toLowerCase();
+    const nameB = (b.name || "").toLowerCase();
+    return nameA.localeCompare(nameB);
+});
+
+const container = document.getElementById("cards");
+
+function render(items) {
+    container.innerHTML = "";
+
+    items.forEach(item => {
+        let html = "<div class='card'>";
+
+        const keys = Object.keys(item);
+
+        html += `<h3>${item["name"]}</h3>
+            <div class="cols">
+                <div class="col">
+        `;
+
+        Object.entries(item.col1).forEach(([k, v]) => {
+            if (v) {
+                html += `
+                <div class="field">
+                    <span class="label">${k}:</span> ${v}
+                </div>`;
+            }
+        });
+
+        html += `</div><div class="col">`;
+
+        Object.entries(item.col2).forEach(([k, v]) => {
+            if (v) {
+                html += `
+                <div class="field">
+                    <span class="label">${k}:</span> ${v}
+                </div>`;
+            }
+        });
+
+        html += `
+                </div>
+            </div>
+        </div>`;
+
+        container.innerHTML += html;
+    });
+}
+
+render(data);
+
+// 🔎 Filtre
+document.getElementById("search").addEventListener("input", e => {
+    const val = e.target.value.toLowerCase();
+
+    const filtered = data.filter(item =>
+        Object.values(item).some(v =>
+            String(v).toLowerCase().includes(val)
+        )
+    );
+
+    render(filtered);
+});
+</script>
+
+</body>
+</html>

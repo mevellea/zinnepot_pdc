@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, Arial;
+    background: #eaf4fb; /* bleu clair */
+    margin: 0;
+    padding: 10px;
+}
+
+h1 {
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+/* SCROLL horizontal mobile */
+.wrapper {
+    overflow-x: auto;
+}
+
+/* TABLE */
+table {
+    border-collapse: collapse;
+    margin: auto;
+    background: white;
+    font-size: 12px;
+}
+
+/* CELLULES */
+th, td {
+    border: 1px solid #ddd;
+    text-align: center;
+    min-width: 32px;
+    height: 36px;
+    position: relative;
+}
+
+/* alternance par garden */
+.row-garden-a td {
+    background: #f8fbff;
+}
+
+.row-garden-b td {
+    background: #eef6fd;
+}
+
+/* HEADER */
+th {
+    background: #2c3e50;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+/* ligne semaines */
+.header-weeks th {
+    top: 0;
+}
+
+/* ligne mois */
+.header-months th {
+    top: 32px; /* hauteur ligne semaines */
+    z-index: 4;
+}
+/* COLONNES FIXES */
+.sticky {
+    position: sticky;
+    left: 0;
+    background: #d6eaf8;
+    z-index: 6;
+    font-weight: bold;
+}
+
+/* décalage sticky
+.sticky.garden { left: 60px; }
+.sticky.bed { left: 120px; }
+ */
+/* mois */
+.month {
+    background: #5dade2;
+    color: white;
+    font-size: 10px;
+}
+
+/* semaine actuelle */
+.current {
+    outline: 2px solid #e74c3c;
+}
+.crop-bar {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    border-radius: 4px;
+    font-size: 10px;
+    padding: 2px;
+    white-space: normal; /* 🔥 plus de coupe */
+    word-break: break-word;
+}
+.grow {
+    background: #abebc6;
+}
+.harvest {
+    background: #27ae60;
+    color: white;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>🌱 Planning cultures</h1>
+
+<div class="wrapper">
+<table id="planning"></table>
+</div>
+
+<script>
+
+// ===== DATA =====
+const data = {{ data | tojson }};
+const weeks = {{ weeks | tojson }};
+const currentWeek = {{ current_week }};
+
+// ===== UTILS =====
+
+// approx mois depuis semaine ISO
+function getMonth(week) {
+    const date = new Date(2025, 0, 1 + (week - 1) * 7);
+    return date.toLocaleString('fr-FR', { month: 'short' });
+}
+
+// ===== GROUP BY BED =====
+const grouped = {};
+
+data.forEach(crop => {
+    const key = `${crop.block}|${crop.garden}|${crop.bed}`;
+
+    if (!grouped[key]) {
+        grouped[key] = {
+            block: crop.block,
+            garden: crop.garden,
+            bed: crop.bed,
+            crops: []
+        };
+    }
+
+    grouped[key].crops.push(crop);
+});
+
+const rows = Object.values(grouped);
+
+// ===== TABLE =====
+const table = document.getElementById("planning");
+
+// ===== HEADER 1 (weeks) =====
+let header1 = "<tr>";
+header1 += "<th class='sticky'>Bed</th>";
+
+weeks.forEach(w => {
+    header1 += `<th class="${w === currentWeek ? 'current' : ''}">${w}</th>`;
+});
+header1 += "</tr>";
+
+table.innerHTML += header1;
+
+// ===== HEADER 2 (months) =====
+let header2 = "<tr>";
+header2 += "<th class='sticky'></th></th>";
+
+let lastMonth = null;
+
+weeks.forEach(w => {
+    const m = getMonth(w);
+
+    if (m !== lastMonth) {
+        header2 += `<th class="month">${m}</th>`;
+        lastMonth = m;
+    } else {
+        header2 += `<th class="month"></th>`;
+    }
+});
+
+header2 += "</tr>";
+table.innerHTML += header2;
+
+
+// ===== ROWS =====
+rows.forEach(rowData => {
+
+    let row = "<tr>";
+
+    row += `<td class="sticky">${rowData.block}.${rowData.garden}.${rowData.bed}</td>`;
+
+    weeks.forEach(w => {
+        let cell = `<td class="${w === currentWeek ? 'current' : ''}">`;
+
+        // superposer les cultures
+        rowData.crops.forEach((crop, index) => {
+            let topOffset = index * 16; // empilement vertical
+            if (w >= crop.grow_start && w <= crop.harvest_end) {
+
+                let cls = "crop-bar grow";
+
+                if (w >= crop.harvest_start && w <= crop.harvest_end) {
+                    cls = "crop-bar harvest";
+                }
+                // label uniquement au début
+                let label = "";
+                if (w === crop.grow_start) {
+                    label = crop.label;
+                } else if (w >= crop.harvest_start && w <= crop.harvest_end) {
+                    label = "R";
+                } else {
+                    label = "_";
+                }
+
+                cell += `
+                <div class="${cls}" style="top:${topOffset}px;">
+                    ${label}
+                </div>`;
+            }
+        });
+        cell += "</td>";
+        row += cell;
+    });
+    row += "</tr>";
+    table.innerHTML += row;
+
+});
+
+</script>
+
+</body>
+</html>

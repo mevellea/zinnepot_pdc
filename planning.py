@@ -10,6 +10,8 @@ from openpyxl import load_workbook
 from crop import Crop, load_crops
 import copy
 
+from customers import gen_customer_html
+
 INPUT_FILE = r"H:\My Drive\3.PDC\PDC.xlsx"
 ITK_OUTPUT_FILE = r"H:\My Drive\3.PDC\export\itk.html"
 TASKS_OUTPUT_FILE = r"H:\My Drive\3.PDC\export\taches.html"
@@ -174,7 +176,7 @@ def extract_planning(crops_database) -> List[CropImplantation]:
     return crops_implantations_sorted
 
 
-def generate_cal_html(harvest: List[CropImplantation], template_file="template_cal.html", output_file="calendar.html"):
+def generate_cal_html(harvest: List[CropImplantation], output_file="calendar.html"):
     current_week = datetime.now().isocalendar()[1]
     all_weeks = set()
 
@@ -203,14 +205,8 @@ def generate_cal_html(harvest: List[CropImplantation], template_file="template_c
             "weeks": row
         })
 
-    # cultures à récolter cette semaine
-    current_harvest = [
-        f"{c.block}-{c.garden}-{c.bed}"
-        for c in harvest
-        if c.harvest_start <= current_week <= c.harvest_end
-    ]
-
     # render HTML
+    template_file ="templates/template_cal.html"
     with open(template_file, encoding="utf-8") as f:
         template = Template(f.read())
 
@@ -257,8 +253,8 @@ def reorder_by_int_attr(objects, attr, reverse=False):
     return sorted(objects, key=lambda obj: getattr(obj, attr), reverse=reverse)
 
 
-def generate_html(html_data, template, filename, title="Tâches"):
-    template = Path(template).read_text(encoding="utf8")
+def generate_html(html_data, template, filename, title):
+    template = Path("templates/" + template).read_text(encoding="utf8")
     data = [c.to_dict() for c in html_data]
     json_data = json.dumps(data, ensure_ascii=False)
     html = template.replace("__DATA__", json_data).replace("__TITLE__", title)
@@ -268,10 +264,11 @@ def generate_html(html_data, template, filename, title="Tâches"):
 def main():
     crops_database = load_crops()
     generate_html(html_data=crops_database, template="template_itk.html", filename=ITK_OUTPUT_FILE, title="Itinéraires techniques")
+    gen_customer_html()
 
     crops_implantations = extract_planning(crops_database)
     generate_html(html_data=crops_implantations, template="template_tasks.html", filename=TASKS_OUTPUT_FILE, title="Taches")
-    generate_cal_html(crops_implantations, template_file="template_cal.html", output_file=CAL_OUTPUT_FILE)
+    generate_cal_html(crops_implantations, output_file=CAL_OUTPUT_FILE)
 
     harvest = extract_harvest(crops_implantations)
     for week in harvest:
