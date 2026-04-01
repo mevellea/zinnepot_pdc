@@ -8,8 +8,11 @@ TEMPLATE_FILE = "templates/template_cust.html"
 CUST_INPUT_FILE = r"H:\My Drive\3.PDC\Auto-cueillette Haren (Responses).xlsx"
 CUST_OUTPUT_FILE = r"H:\My Drive\3.PDC\export\clients.html"
 
+
 def load_data():
-    df = pd.read_excel(CUST_INPUT_FILE)
+    print(f" ### Loading customer file {CUST_INPUT_FILE}")
+    df = pd.read_excel(CUST_INPUT_FILE, skiprows=[1])
+    df.drop(df.tail(2).index, inplace=True)  # drop last 2 rows
 
     # Nettoyage colonnes
     df.columns = [c.strip() for c in df.columns]

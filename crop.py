@@ -1,3 +1,4 @@
+import operator
 import re
 from typing import List
 
@@ -42,15 +43,51 @@ class Crop:
     def to_dict(self):
         return self.__dict__
 
+    def get_int(self, prop):
+        attr_val = getattr(self, prop)
+        if isinstance(attr_val, str) and "-" in attr_val:
+            return attr_val
+        return int(float(attr_val)) if attr_val else 0
+
+    def to_print(self):
+        useless_attrs = ["Terreau semis", "category", "Technique semis pep", "Densité graines g/30m",
+                         "Jours en pep", "Jours au champ", "DTM", "Variété", "Nb jours avant levée", "Lignes / planche",
+                         "Espacement sur la ligne (cm)", 'Calibration', "Fenêtre récolte (jours)",
+                         'Type de plateau', 'Plateau transplant', "# graines / cellule", "# cellule / planche 12m",
+                         "% marge sécurité pour transplants", "# plateau / planche 12m",
+                         "Température germination (C)", "Terreau rempotage", "Row marking"
+                         ]
+
+        items_print = {
+            "Jours en pep / au champ / DTM / récolte":
+                f'{self.get_int("Jours en pep")} / {self.get_int("Jours au champ")} / '
+                f'{self.get_int("DTM")} / {self.get_int("Fenêtre récolte (jours)")}',
+            "Lignes/planche": f'{self.get_int("Lignes / planche")}r'
+                                            f'{self.get_int("Espacement sur la ligne (cm)")}',
+
+        }
+        if getattr(self, "Technique") == "TR":
+            items_print[f"#graines/cellule, marge, #cellule/12m, #plateau {self.get_int('Type de plateau')}"] = (
+                f'{self.get_int("# graines / cellule")} / '
+                f'{getattr(self, "% marge sécurité pour transplants")} / '
+                f'{self.get_int("# cellule / planche 12m")} / '
+                f'{getattr(self, "# plateau / planche 12m")}'
+            )
+        items_print.update(**self.to_dict().copy())
+
+        for item in useless_attrs:
+            if item in items_print:
+                items_print.pop(item)
+        return items_print
+
     @property
     def crop(self):
         return getattr(self, "Culture")
 
     def __str__(self):
-        val = f"{self.crop} "
-        return val
+        return self.crop
 
-    def transform_tasks(self):
+    def prepare_print(self):
         attrs = list(vars(self).keys())
         new_attrs = {}
         to_delete = []
@@ -65,7 +102,7 @@ class Crop:
 
                 if hasattr(self, days_key):
                     days = getattr(self, days_key)
-                    if days != "" and task not in ["NS", "TR", "DS"]:
+                    if days != "" and task not in ["NS", "TR", "DS", "Crop out", "Harvest starts"]:
                         days_int = int(float(days))
                         new_key = f"Tâche J={days_int}"
                         new_attrs[new_key] = task
@@ -108,7 +145,7 @@ def load_crops():
         else:
             print(f"  # {crop_value} not found in ITK database")
 
-        new_crop.transform_tasks()
+        new_crop.prepare_print()
         crops.append(new_crop)
 
     print(f"{len(crops)} crops loaded")

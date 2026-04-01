@@ -15,7 +15,7 @@ from customers import gen_customer_html
 INPUT_FILE = r"H:\My Drive\3.PDC\PDC.xlsx"
 ITK_OUTPUT_FILE = r"H:\My Drive\3.PDC\export\itk.html"
 TASKS_OUTPUT_FILE = r"H:\My Drive\3.PDC\export\taches.html"
-CAL_OUTPUT_FILE = r"H:\My Drive\3.PDC\export\calendar.html"
+CAL_OUTPUT_FILE = r"H:\My Drive\3.PDC\export\calendar_gen.html"
 
 
 class CropImplantation(Crop):
@@ -271,7 +271,7 @@ class PDC:
 def generate_html(html_data, template, filename, title):
     template = Path("templates/" + template).read_text(encoding="utf8")
     data = [
-        {k: v for k, v in c.to_dict().items() if not k.startswith("_")}
+        {k: v for k, v in c.to_print().items() if not k.startswith("_")}
         for c in html_data
     ]
     json_data = json.dumps(data, ensure_ascii=False)
