@@ -24,6 +24,7 @@ class CropImplantation(Crop):
     bed: int
 
     variety: str
+    location: str
 
     grow_start: int
     grow_end: int
@@ -38,14 +39,12 @@ class CropImplantation(Crop):
         super().__init__(**entries)
         self.variety = ""
         if self.harvest_start is None or self.harvest_end is None:
-            raise ValueError(f"{self.get_location()} {self.crop}: harvest_start and harvest_end must be set")
-
-    def get_location(self):
-        return f"{self.block}.{self.garden}.{self.bed}"
+            raise ValueError(f"{self.location} {self.crop}: harvest_start and harvest_end must be set")
 
     def update(self, **entries):
         for k, v in entries.items():
             setattr(self, k, v)
+        self.location = f"{self.block}.{self.garden}.{self.bed}"
         jours_en_pep = getattr(self, "Jours en pep")
         if jours_en_pep == "":
             jours_en_pep = 0
@@ -54,7 +53,7 @@ class CropImplantation(Crop):
             task.update(self.grow_start)
 
     def print(self, week=None):
-        header = f"{self.get_location()} {self.crop} "
+        header = f"{self.location} {self.crop} "
         if self.variety:
             header += f"/ {self.variety} "
         # header += f"S={self.sowing_week} DTM=[{self.grow_start}-{self.grow_end}]
