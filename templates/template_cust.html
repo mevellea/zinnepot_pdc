@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Clients</title>
+<title>Abonnés</title>
 
 <style>
 body {
@@ -21,39 +21,75 @@ body {
     border: 1px solid #ccc;
 }
 
+/* GRID */
 .container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
     gap: 15px;
 }
 
+/* CARD */
 .card {
     background: white;
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .card h3 {
-    margin-top: 0;
+    margin: 0;
     color: #2a5d9f;
 }
 
-.field {
-    margin: 5px 0;
-    font-size: 14px;
-}
-
-.label {
-    font-weight: bold;
-}
-.cols {
+/* TOP SPLIT */
+.top {
     display: flex;
     gap: 10px;
 }
 
-.col {
+.left, .right {
     flex: 1;
+    background: #f7faff;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+/* BOTTOM */
+.bottom {
+    background: #f0f4ff;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+/* FIELDS */
+.field {
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.label {
+    font-weight: bold;
+    color: #444;
+}
+
+/* LIST STYLE */
+.notes {
+    padding-left: 18px;
+    margin: 0;
+}
+
+.notes li {
+    margin-bottom: 5px;
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+    .top {
+        flex-direction: column;
+    }
 }
 </style>
 
@@ -61,33 +97,29 @@ body {
 <body>
 
 <input type="text" id="search" placeholder="🔍 Filtrer...">
-
 <div class="container" id="cards"></div>
 
 <script>
 const data = {{ json_data | safe }};
-
-data.sort((a, b) => {
-    const nameA = (a.name || "").toLowerCase();
-    const nameB = (b.name || "").toLowerCase();
-    return nameA.localeCompare(nameB);
-});
-
 const container = document.getElementById("cards");
+
+// tri
+data.sort((a, b) => (a.name || "").localeCompare(b.name || "", 'fr', { sensitivity: 'base' }));
 
 function render(items) {
     container.innerHTML = "";
 
     items.forEach(item => {
-        let html = "<div class='card'>";
 
-        const keys = Object.keys(item);
+        let html = `
+        <div class="card">
+            <h3>${item.name || "Fiche"}</h3>
 
-        html += `<h3>${item["name"]}</h3>
-            <div class="cols">
-                <div class="col">
+            <div class="top">
+                <div class="left">
         `;
 
+        // LEFT = contact
         Object.entries(item.col1).forEach(([k, v]) => {
             if (v) {
                 html += `
@@ -97,8 +129,9 @@ function render(items) {
             }
         });
 
-        html += `</div><div class="col">`;
+        html += `</div><div class="right">`;
 
+        // RIGHT = misc
         Object.entries(item.col2).forEach(([k, v]) => {
             if (v) {
                 html += `
@@ -111,7 +144,23 @@ function render(items) {
         html += `
                 </div>
             </div>
-        </div>`;
+
+            <div class="bottom">
+                <ul class="notes">
+        `;
+
+        // BOTTOM = list
+        if (item.notes && item.notes.length) {
+            item.notes.forEach(n => {
+                html += `<li>${n}</li>`;
+            });
+        }
+
+        html += `
+                </ul>
+            </div>
+        </div>
+        `;
 
         container.innerHTML += html;
     });
@@ -119,14 +168,12 @@ function render(items) {
 
 render(data);
 
-// 🔎 Filtre
+// 🔎 filtre
 document.getElementById("search").addEventListener("input", e => {
     const val = e.target.value.toLowerCase();
 
     const filtered = data.filter(item =>
-        Object.values(item).some(v =>
-            String(v).toLowerCase().includes(val)
-        )
+        JSON.stringify(item).toLowerCase().includes(val)
     );
 
     render(filtered);
