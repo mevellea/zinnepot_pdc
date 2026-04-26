@@ -1,6 +1,7 @@
 import openpyxl
+from shared import ROOT_FOLDER
 
-CF_INPUT_FILE = r"H:\My Drive\3.PDC\Crop planning CycleFarm.xlsx"
+CF_INPUT_FILE = ROOT_FOLDER / "Crop planning CycleFarm.xlsx"
 
 # Keys that signal the start of a new crop entry (row[0] is the name, row[1] is None)
 PROPERTY_KEYS = {"Pépinière", "itinéraire", "Séries", "Variété", "Fournisseur",

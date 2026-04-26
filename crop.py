@@ -1,11 +1,11 @@
-import operator
 import re
 from typing import List
 
 import pandas as pd
 from itk import parse_itk
+from shared import ROOT_FOLDER
 
-MC_INPUT_FILE = r"H:\My Drive\3.PDC\Crop_planning_4.0_ Eng_MC1.xlsx"
+MC_INPUT_FILE = ROOT_FOLDER / "PDC.xlsx"
 MC_SHEET_NAME = "Crop Chart"
 
 

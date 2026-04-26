@@ -1,18 +1,21 @@
+
 import pandas as pd
 from jinja2 import Environment, FileSystemLoader
 import json
+from shared import ROOT_FOLDER
 
 TEMPLATE_FILE = "templates/template_cust.html"
 
 
-CUST_INPUT_FILE = r"H:\My Drive\3.PDC\Auto-cueillette Haren (Responses).xlsx"
-CUST_DATA_FILE = r"H:\My Drive\3.PDC\cueilleurs.xlsx"
-CUST_OUTPUT_FILE = r"H:\My Drive\3.PDC\export\clients.html"
+CUST_INPUT_FILE = ROOT_FOLDER / "Auto-cueillette Haren (Responses).xlsx"
+CUST_DATA_FILE = ROOT_FOLDER / "cueilleurs.xlsx"
+CUST_OUTPUT_FILE = ROOT_FOLDER / "export" / "clients.html"
 
 
 def load_data():
-    print(f" ### Loading file {CUST_INPUT_FILE}")
+    print(f" ### Loading file {CUST_INPUT_FILE.name}")
     df = pd.read_excel(CUST_INPUT_FILE, skiprows=[1], index_col=11)
+    df.index = df.index.str.strip()
     df.drop(df.tail(2).index, inplace=True)  # drop last 2 rows
     df.columns = [c.strip() for c in df.columns]
 
@@ -20,12 +23,15 @@ def load_data():
         "Comment avez-vous entendu parler du projet d'auto-cueillette de l'Asbl Zinnepot ?": "Source",
         "Comment souhaitez-vous être informé des nouvelles du champ (récoltes disponibles, changement d'horaires, autres informations importantes...) ?": "Comm",
         "Souhaiteriez-vous avoir accès à d'autres produits ?": "Produits",
-        "En combien de fois voulez-vous payer l'abonnement?": "Paiement",
+        "En combien de fois voulez-vous payer l'abonnement?": "Abonnement",
         "Commentaires, allergies ou informations importantes à nous communiquer": "Commentaires",
         "Quels produits vous intéressent le plus ?": "Préférences",
         "Quel formule choisissez-vous ? 2": "Prix",
         "Infos supplémentaires, si étudiants en kot précisez les âges": "Infos",
-        "À quelle fréquence pensez-vous venir cueillir ?": "Frequence"
+        "À quelle fréquence pensez-vous venir cueillir ?": "Frequence",
+        "Nombre d'adultes du foyer": "Nb adultes",
+        "Jours préférés pour la cueillette": "Jours préférés",
+        "Comment voulez-vous payer l'abonnement ?": "Mode paiement",
         }
     )
     # ✅ Conversion timestamps / dates
@@ -47,14 +53,14 @@ def load_data():
             raw_price_adulte = 280 / 1.06
 
         raw_price_enfant = 13.0 * row["Ages des enfants"] / 1.06
-        if row["Paiement"] == "En deux fois, en début et milieu de saison":
+        if row["Abonnement"] == "En deux fois, en début et milieu de saison":
             raw_price_adulte /= 2
             raw_price_enfant /= 2
-            payment = "Mi-saison"
+            abonnement = "Mi-saison"
         else:
-            payment = "Complète"
+            abonnement = "Complète"
 
-        df.loc[index, "Paiement"] = payment
+        df.loc[index, "Abonnement"] = abonnement
         df.loc[index, "Prix brut adulte x1"] = round(raw_price_adulte, 3)
         df.loc[index, "Prix brut enfant tous"] = round(raw_price_enfant, 3)
 
@@ -63,6 +69,18 @@ def load_data():
 
     print(f" ### Loading data file {CUST_DATA_FILE}")
     df_data = pd.read_excel(CUST_DATA_FILE, index_col=0)
+    df_data.index = df_data.index.str.strip()
+    set_index = set([x.strip() for x in set(df.index)])
+    set_data_index = set([x.strip() for x in set(df_data.index)])
+    if set_index != set_data_index:
+        raise ValueError(
+            f"Missing in reference: {set_data_index - set_index}\n"
+            f"Missing in database: {set_index - set_data_index}"
+        )
+
+    print(" ### Somme des adultes: " + str(int(df["Nb adultes"].sum())))
+    print(" ### Somme enfants: " + ", ".join(df["Ages des enfants"].dropna().astype(str)))
+
     return df.join(df_data)
 
 
@@ -75,7 +93,7 @@ def split_fields(record):
 
         if any(x in key for x in ["date", "time", "prénom", "règles", "objets"]):
             pass
-        elif any(x in key for x in ["nombre", "prix", "adresse", "ages", "infos", "paiement"]):
+        elif any(x in key for x in ["nombre", "nb", "prix", "adresse", "ages", "infos", "abonnement"]):
             col1[k] = v
         else:
             col2[k] = v

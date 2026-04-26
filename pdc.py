@@ -9,13 +9,15 @@ from datetime import datetime
 from openpyxl import load_workbook
 from crop import Crop, load_crops
 import copy
+from shared import ROOT_FOLDER
 
 from customers import gen_customer_html
 
-INPUT_FILE = r"H:\My Drive\3.PDC\PDC.xlsx"
-ITK_OUTPUT_FILE = r"H:\My Drive\3.PDC\export\itk.html"
-TASKS_OUTPUT_FILE = r"H:\My Drive\3.PDC\export\taches.html"
-CAL_OUTPUT_FILE = r"H:\My Drive\3.PDC\export\calendar_gen.html"
+INPUT_FILE = ROOT_FOLDER / "PDC.xlsx"
+EXPORT_FOLDER = ROOT_FOLDER / "export"
+ITK_OUTPUT_FILE = EXPORT_FOLDER / "itk.html"
+TASKS_OUTPUT_FILE = EXPORT_FOLDER / "taches.html"
+CAL_OUTPUT_FILE = EXPORT_FOLDER / "calendar_gen.html"
 
 
 class CropImplantation(Crop):
@@ -180,7 +182,7 @@ class PDC:
                         harvest_start=harvest_start,
                         harvest_end=harvest_end,
                         variety=variety,
-                        sowing_done=sowing_done,
+                        sowing_done=sowing_done or transplanting_done,
                         transplanting_done=transplanting_done
                     )
                     crops_implantations.append(crop_impl)
