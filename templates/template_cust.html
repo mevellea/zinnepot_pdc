@@ -1,183 +1,224 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Abonnés</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Contacts</title>
 
 <style>
+
 body {
-    font-family: Arial;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto;
     background: #eef6ff;
     margin: 0;
-    padding: 10px;
+    padding: 12px;
 }
 
+/* 🔍 SEARCH */
 #search {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     width: 100%;
-    padding: 12px;
+    padding: 14px;
     margin-bottom: 15px;
     font-size: 16px;
-    border-radius: 8px;
+    border-radius: 12px;
     border: 1px solid #ccc;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
-/* GRID */
+/* CONTAINER */
 .container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-    gap: 15px;
+    grid-template-columns: 1fr;
+    gap: 12px;
 }
 
 /* CARD */
 .card {
     background: white;
-    border-radius: 14px;
-    padding: 15px;
-    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
     display: flex;
     flex-direction: column;
     gap: 12px;
+    width: 100%;
 }
 
+/* TITLE */
 .card h3 {
     margin: 0;
-    color: #2a5d9f;
+    font-size: 18px;
+    color: #1f4e8c;
 }
 
-/* TOP SPLIT */
+/* TOP */
 .top {
     display: flex;
+    flex-direction: column;
     gap: 10px;
 }
 
+/* BLOCKS */
 .left, .right {
-    flex: 1;
     background: #f7faff;
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 10px;
 }
 
-/* BOTTOM */
-.bottom {
-    background: #f0f4ff;
-    border-radius: 10px;
-    padding: 10px;
+/* SECTION LABELS */
+.left::before {
+    content: "Contact";
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b8bbd;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.right::before {
+    content: "Infos";
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b8bbd;
+    display: block;
+    margin-bottom: 6px;
 }
 
 /* FIELDS */
 .field {
-    font-size: 13px;
+    font-size: 14px;
     margin-bottom: 6px;
+    line-height: 1.4;
 }
 
 .label {
-    font-weight: bold;
-    color: #444;
+    font-weight: 600;
+    color: #333;
 }
 
-/* LIST STYLE */
+/* NOTES */
+.bottom {
+    background: #edf3ff;
+    border-radius: 12px;
+    padding: 10px;
+}
+
 .notes {
-    padding-left: 18px;
+    padding-left: 16px;
     margin: 0;
+    font-size: 14px;
 }
 
-.notes li {
-    margin-bottom: 5px;
-}
-
-/* MOBILE */
-@media (max-width: 600px) {
-    .top {
+/* 📱 FORCE SINGLE COLUMN */
+@media (max-width: 699px) {
+    .container {
+        display: flex;
         flex-direction: column;
     }
+
+    .card {
+        width: 100%;
+    }
 }
+
+/* 💻 DESKTOP */
+@media (min-width: 700px) {
+    .container {
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    }
+
+    .top {
+        flex-direction: row;
+    }
+}
+
 </style>
 
 </head>
+
 <body>
 
-<input type="text" id="search" placeholder="🔍 Filtrer...">
-<div class="container" id="cards"></div>
+<input type="text" id="search" placeholder="Rechercher...">
+
+<div class="container" id="container"></div>
 
 <script>
-const data = {{ json_data | safe }};
-const container = document.getElementById("cards");
 
-// tri
-data.sort((a, b) => (a.name || "").localeCompare(b.name || "", 'fr', { sensitivity: 'base' }));
+const data = __DATA__
 
-function render(items) {
-    container.innerHTML = "";
+function render(list){
 
-    items.forEach(item => {
+    const container = document.getElementById("container")
+    container.innerHTML = ""
 
-        let html = `
-        <div class="card">
-            <h3>${item.name || "Fiche"}</h3>
+    list.forEach(item => {
+
+        const card = document.createElement("div")
+        card.className = "card"
+
+        const leftFields = Object.entries(item)
+            .filter(([k]) => ["Nom","Prenom","Tel","Email"].includes(k))
+
+        const rightFields = Object.entries(item)
+            .filter(([k]) => !["Nom","Prenom","Tel","Email","Notes"].includes(k))
+
+        const notes = item.Notes ? item.Notes.split("\n") : []
+
+        card.innerHTML = `
+            <h3>${item.Nom || ""} ${item.Prenom || ""}</h3>
 
             <div class="top">
                 <div class="left">
-        `;
+                    ${leftFields.map(([k,v]) => `
+                        <div class="field">
+                            <span class="label">${k}:</span>
+                            ${k.toLowerCase().includes("tel") ? `<a href="tel:${v}">${v}</a>` : v || ""}
+                        </div>
+                    `).join("")}
+                </div>
 
-        // LEFT = contact
-        Object.entries(item.col1).forEach(([k, v]) => {
-            if (v) {
-                html += `
-                <div class="field">
-                    <span class="label">${k}:</span> ${v}
-                </div>`;
-            }
-        });
-
-        html += `</div><div class="right">`;
-
-        // RIGHT = misc
-        Object.entries(item.col2).forEach(([k, v]) => {
-            if (v) {
-                html += `
-                <div class="field">
-                    <span class="label">${k}:</span> ${v}
-                </div>`;
-            }
-        });
-
-        html += `
+                <div class="right">
+                    ${rightFields.map(([k,v]) => `
+                        <div class="field">
+                            <span class="label">${k}:</span> ${v || ""}
+                        </div>
+                    `).join("")}
                 </div>
             </div>
 
-            <div class="bottom">
-                <ul class="notes">
-        `;
+            ${notes.length ? `
+                <div class="bottom">
+                    <ul class="notes">
+                        ${notes.map(n => `<li>${n}</li>`).join("")}
+                    </ul>
+                </div>
+            ` : ""}
+        `
 
-        // BOTTOM = list
-        if (item.notes && item.notes.length) {
-            item.notes.forEach(n => {
-                html += `<li>${n}</li>`;
-            });
-        }
-
-        html += `
-                </ul>
-            </div>
-        </div>
-        `;
-
-        container.innerHTML += html;
-    });
+        container.appendChild(card)
+    })
 }
 
-render(data);
-
-// 🔎 filtre
+/* 🔍 SEARCH */
 document.getElementById("search").addEventListener("input", e => {
-    const val = e.target.value.toLowerCase();
+    const q = e.target.value.toLowerCase()
 
     const filtered = data.filter(item =>
-        JSON.stringify(item).toLowerCase().includes(val)
-    );
+        Object.values(item).some(v =>
+            String(v).toLowerCase().includes(q)
+        )
+    )
 
-    render(filtered);
-});
+    render(filtered)
+})
+
+render(data)
+
 </script>
 
 </body>

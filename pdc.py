@@ -17,6 +17,7 @@ INPUT_FILE = ROOT_FOLDER / "PDC.xlsx"
 EXPORT_FOLDER = ROOT_FOLDER / "export"
 ITK_OUTPUT_FILE = EXPORT_FOLDER / "itk.html"
 TASKS_OUTPUT_FILE = EXPORT_FOLDER / "taches.html"
+TASKS_WEEK_OUTPUT_FILE = EXPORT_FOLDER / "taches_semaine.html"
 CAL_OUTPUT_FILE = EXPORT_FOLDER / "calendar_gen.html"
 
 
@@ -156,38 +157,39 @@ class PDC:
                     harvest_end = weeks[col]
                     col += 1
 
-                if crop:
-                    sowing_done = "#" in crop
-                    transplanting_done = "!" in crop
-                    crop = crop.replace("#", "").replace("!", "").lstrip()
-
-                    if " - " in crop:
-                        crop_name, variety = crop.split(" - ")
-                    else:
-                        crop_name, variety = crop, ""
-
-                    try:
-                        ref_crop = next(c for c in crops if c.crop == crop_name)
-                    except StopIteration:
-                        raise ValueError(f"{crop}: {crop_name} not found")
-
-                    crop_impl = copy.deepcopy(ref_crop)
-                    crop_impl.__class__ = CropImplantation
-                    crop_impl.update(
-                        block=int(bloc),
-                        garden=int(jardin),
-                        bed=int(planche),
-                        grow_start=grow_start,
-                        grow_end=grow_end,
-                        harvest_start=harvest_start,
-                        harvest_end=harvest_end,
-                        variety=variety,
-                        sowing_done=sowing_done or transplanting_done,
-                        transplanting_done=transplanting_done
-                    )
-                    crops_implantations.append(crop_impl)
-
                 col += 1
+                if not crop:
+                    continue
+
+                sowing_done = "#" in crop
+                transplanting_done = "!" in crop
+                crop = crop.replace("#", "").replace("!", "").lstrip()
+
+                if " - " in crop:
+                    crop_name, variety = crop.split(" - ")
+                else:
+                    crop_name, variety = crop, ""
+
+                try:
+                    ref_crop = next(c for c in crops if c.crop == crop_name)
+                except StopIteration:
+                    raise ValueError(f"{crop}: {crop_name} not found")
+
+                crop_impl = copy.deepcopy(ref_crop)
+                crop_impl.__class__ = CropImplantation
+                crop_impl.update(
+                    block=int(bloc),
+                    garden=int(jardin),
+                    bed=int(planche),
+                    grow_start=grow_start,
+                    grow_end=grow_end,
+                    harvest_start=harvest_start,
+                    harvest_end=harvest_end,
+                    variety=variety,
+                    sowing_done=sowing_done or transplanting_done,
+                    transplanting_done=transplanting_done
+                )
+                crops_implantations.append(crop_impl)
 
         def reorder_by_int_attr(objects, attr, reverse=False):
             return sorted(objects, key=lambda obj: getattr(obj, attr), reverse=reverse)
@@ -293,6 +295,8 @@ def main():
     pdc.generate_cal_html(output_file=CAL_OUTPUT_FILE)
     generate_html(html_data=pdc.crops_implantations, template="template_tasks.html", filename=TASKS_OUTPUT_FILE,
                   title="Tâches")
+    generate_html(html_data=pdc.crops_implantations, template="template_tasks_week.html", filename=TASKS_WEEK_OUTPUT_FILE,
+                  title="Tâches semaine")
     pdc.print_current_week()
 
 
