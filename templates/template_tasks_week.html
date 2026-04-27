@@ -94,10 +94,54 @@ td{
     color:#555;
 }
 
+.nav-buttons{
+    width:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:12px;
+    margin:16px 0;
+}
+
+.nav-btn{
+    border:none;
+    padding:8px 14px;
+    border-radius:20px;
+    background:white;
+    cursor:pointer;
+    font-weight:600;
+    box-shadow:0 2px 4px rgba(0,0,0,0.1);
+    transition:all 0.2s;
+}
+
+.nav-wrapper{
+    display:flex;
+    justify-content:center;
+    width:100%;
+}
+
+.nav-btn:hover{
+    transform:translateY(-1px);
+    box-shadow:0 4px 8px rgba(0,0,0,0.15);
+}
+
+.nav-btn.current{
+    background:#2e7d32;
+    color:white;
+}
+
 </style>
 </head>
 
 <body>
+
+<div class="nav-wrapper">
+    <div class="nav-buttons">
+        <button class="nav-btn" onclick="prevWeek()">❮</button>
+        <button class="nav-btn current" id="current-week-btn" onclick="resetWeek()"></button>
+        <button class="nav-btn" onclick="nextWeek()">❯</button>
+    </div>
+</div>
 
 <div class="container">
 
@@ -115,7 +159,8 @@ td{
 <tbody id="late-body"></tbody>
 </table>
 
-<div class="section-title">🔥 À faire cette semaine</div>
+
+<div class="section-title" id="current-section-title"></div>
 <table>
 <thead>
 <tr>
@@ -135,9 +180,14 @@ td{
 
 const crops = __DATA__
 
-const currentWeek = new Date()
+let currentWeek = new Date()
 const onejan = new Date(currentWeek.getFullYear(),0,1)
-const week = Math.ceil((((currentWeek - onejan) / 86400000) + onejan.getDay()+1)/7)
+
+function getWeekFromDate(d){
+    return Math.ceil((((d - onejan) / 86400000) + onejan.getDay()+1)/7)
+}
+
+let displayedWeek = getWeekFromDate(currentWeek)
 
 const minWeek = 10
 const maxWeek = 48
@@ -147,22 +197,64 @@ function percent(w){
     return ((w-minWeek)/span)*100
 }
 
+function updateCurrentWeekButton(){
+    const current = getWeekFromDate(new Date())
+    const btn = document.getElementById("current-week-btn")
+
+    btn.innerText = `Semaine ${current}`
+
+    if(displayedWeek !== current){
+        btn.style.opacity = "1"
+    } else {
+        btn.style.opacity = "0.6"
+    }
+}
+
+function updateSectionTitle(){
+    document.getElementById("current-section-title").innerText =
+        `🔥 A faire semaine ${displayedWeek}`
+}
+
 function getState(c){
     if(
-        (c.sowing_week && week > c.sowing_week) ||
-        (c.grow_start && week > c.grow_start)
+        (c.sowing_week && displayedWeek > c.sowing_week) ||
+        (c.grow_start && displayedWeek > c.grow_start)
     ){
         return "planning_late"
     }
 
     if(
-        week === c.sowing_week ||
-        week === c.grow_start
+        displayedWeek === c.sowing_week ||
+        displayedWeek === c.grow_start
     ){
         return "planning_current"
     }
 
     return null
+}
+
+function jumpToWeek(w){
+    displayedWeek = w
+    render()
+}
+
+function updateWeekLabel(){
+    document.getElementById("week-label").innerText = `Semaine ${displayedWeek}`
+}
+
+function nextWeek(){
+    displayedWeek++
+    render()
+}
+
+function prevWeek(){
+    displayedWeek--
+    render()
+}
+
+function resetWeek(){
+    displayedWeek = getWeekFromDate(new Date())
+    render()
 }
 
 function renderRow(c){
@@ -177,12 +269,12 @@ function renderRow(c){
     let transplantClass=""
 
     if(c.sowing_done) sowClass="green"
-    else if(week == c.sowing_week) sowClass="yellow"
-    else if(week > c.sowing_week) sowClass="red"
+    else if(displayedWeek == c.sowing_week) sowClass="yellow"
+    else if(displayedWeek > c.sowing_week) sowClass="red"
 
     if(c.transplanting_done) transplantClass="green"
-    else if(week == c.grow_start) transplantClass="yellow"
-    else if(week > c.grow_start) transplantClass="red"
+    else if(displayedWeek == c.grow_start) transplantClass="yellow"
+    else if(displayedWeek > c.grow_start) transplantClass="red"
 
     return `
 <tr>
@@ -214,15 +306,15 @@ ${c.grow_start || ""}
 
 function isLate(c){
     return (
-        (c.sowing_week && !c.sowing_done && week > c.sowing_week) ||
-        (c.grow_start && !c.transplanting_done && week > c.grow_start)
+        (c.sowing_week && !c.sowing_done && displayedWeek > c.sowing_week) ||
+        (c.grow_start && !c.transplanting_done && displayedWeek > c.grow_start)
     )
 }
 
 function isCurrent(c){
     return (
-        (c.sowing_week && !c.sowing_done && week === c.sowing_week) ||
-        (c.grow_start && !c.transplanting_done && week === c.grow_start)
+        (c.sowing_week && !c.sowing_done && displayedWeek === c.sowing_week) ||
+        (c.grow_start && !c.transplanting_done && displayedWeek === c.grow_start)
     )
 }
 
@@ -236,6 +328,8 @@ function openCalendar(){
 }
 
 function render(){
+    updateCurrentWeekButton()
+    updateSectionTitle()
 
     const late = []
     const current = []
