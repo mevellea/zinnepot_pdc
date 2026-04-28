@@ -3,120 +3,120 @@
 
 <head>
 
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Planning cultures</title>
+    <title>Planning cultures</title>
 
-<style>
+    <style>
 
-body{
-    font-family:system-ui,-apple-system,Segoe UI,Roboto;
-    margin:0;
-    background:#f4f6f8;
-}
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto;
+            margin: 0;
+            background: #f4f6f8;
+        }
 
-.header{
-    color:white;
-    padding:14px;
-    text-align:center;
-    font-size:20px;
-}
+        .header {
+            color: white;
+            padding: 14px;
+            text-align: center;
+            font-size: 20px;
+        }
 
-.container{
-    background:#2e7d32;
-    padding:10px;
-}
+        .container {
+            background: #2e7d32;
+            padding: 10px;
+        }
 
-table{
-    width:100%;
-    border-collapse:collapse;
-    background:white;
-    border-radius:10px;
-    overflow:hidden;
-    box-shadow:0 2px 6px rgba(0,0,0,0.1);
-}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
 
-th{
-    background:#e8f5e9;
-    text-align:left;
-    padding:8px;
-    font-size:13px;
-    cursor:pointer;
-    user-select:none;
-    text-align:center;
-}
+        th {
+            background: #e8f5e9;
+            text-align: left;
+            padding: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            user-select: none;
+            text-align: center;
+        }
 
-th:hover{
-    background:#dcedc8;
-}
+        th:hover {
+            background: #dcedc8;
+        }
 
-td{
-    padding:8px;
-    font-size:13px;
-    border-top:1px solid #eee;
-    vertical-align:middle;
-    text-align:center;
-}
+        td {
+            padding: 8px;
+            font-size: 13px;
+            border-top: 1px solid #eee;
+            vertical-align: middle;
+            text-align: center;
+        }
 
-.location{
-    cursor:pointer;
-    font-weight:600;
-}
+        .location {
+            cursor: pointer;
+            font-weight: 600;
+        }
 
-.location:hover{
-    text-decoration:underline;
-}
+        .location:hover {
+            text-decoration: underline;
+        }
 
-.small{
-    font-size:12px;
-    color:#555;
-}
+        .small {
+            font-size: 12px;
+            color: #555;
+        }
 
-.timeline{
-    position:relative;
-    height:10px;
-    background:#eee;
-    border-radius:6px;
-    min-width:120px;
-}
+        .timeline {
+            position: relative;
+            height: 10px;
+            background: #eee;
+            border-radius: 6px;
+            min-width: 120px;
+        }
 
-.grow{
-    position:absolute;
-    height:10px;
-    background:#66bb6a;
-    border-radius:6px;
-}
+        .grow {
+            position: absolute;
+            height: 10px;
+            background: #66bb6a;
+            border-radius: 6px;
+        }
 
-.harvest{
-    position:absolute;
-    height:10px;
-    background:#2e7d32;
-    border-radius:6px;
-}
+        .harvest {
+            position: absolute;
+            height: 10px;
+            background: #2e7d32;
+            border-radius: 6px;
+        }
 
-.green{
-    background:#BADE1B;
-}
+        .green {
+            background: #BADE1B;
+        }
 
-.yellow{
-    background:#EBDE4D;
-}
+        .yellow {
+            background: #EBDE4D;
+        }
 
-.red{
-    background:#E8978B;
-}
+        .red {
+            background: #E8978B;
+        }
 
-.itk{
-    cursor:pointer;
-    font-weight:600;
-}
+        .itk {
+            cursor: pointer;
+            font-weight: 600;
+        }
 
-.itk:hover{
-    text-decoration:underline;
-}
+        .itk:hover {
+            text-decoration: underline;
+        }
 
-</style>
+    </style>
 
 </head>
 
@@ -124,82 +124,78 @@ td{
 
 <div class="container">
 
-<table>
+    <table>
 
-<thead>
-<tr>
-<th data-sort="location">Planche</th>
-<th data-sort="Culture">Culture</th>
-<th data-sort="sowing_week">Semis</th>
-<th data-sort="grow_start">Transplant</th>
-<th>Calendrier</th>
-</tr>
-</thead>
+        <thead>
+        <tr>
+            <th data-sort="location">Planche</th>
+            <th data-sort="Culture">Culture</th>
+            <th data-sort="sowing_week">Semis</th>
+            <th data-sort="grow_start">Transplant</th>
+            <th>Calendrier</th>
+        </tr>
+        </thead>
 
-<tbody id="table-body"></tbody>
+        <tbody id="table-body"></tbody>
 
-</table>
+    </table>
 
 </div>
 
 <script>
 
-const crops = __DATA__
+    const crops = __DATA__
 
-let currentSort = null
-let asc = true
+    let currentSort = null
+    let asc = true
 
-const currentWeek = new Date()
-const onejan = new Date(currentWeek.getFullYear(),0,1)
-const week = Math.ceil((((currentWeek - onejan) / 86400000) + onejan.getDay()+1)/7)
+    const currentWeek = new Date()
+    const onejan = new Date(currentWeek.getFullYear(), 0, 1)
+    const week = Math.ceil((((currentWeek - onejan) / 86400000) + onejan.getDay() + 1) / 7)
 
-const minWeek = 10
-const maxWeek = 48
-const span = maxWeek - minWeek
+    const minWeek = 10
+    const maxWeek = 48
+    const span = maxWeek - minWeek
 
-function percent(w){
-    return ((w-minWeek)/span)*100
-}
+    function percent(w) {
+        return ((w - minWeek) / span) * 100
+    }
 
-function render(data){
+    function render(data) {
 
-    const tbody = document.getElementById("table-body")
-    tbody.innerHTML = ""
+        const tbody = document.getElementById("table-body")
+        tbody.innerHTML = ""
 
-    data.forEach(c => {
+        data.forEach(c => {
 
-        const growLeft = percent(c.grow_start)
-        const growWidth = percent(c.grow_end) - growLeft
+            const growLeft = percent(c.grow_start)
+            const growWidth = percent(c.grow_end) - growLeft
 
-        const harvestLeft = percent(c.harvest_start)
-        const harvestWidth = percent(c.harvest_end) - harvestLeft
+            const harvestLeft = percent(c.harvest_start)
+            const harvestWidth = percent(c.harvest_end) - harvestLeft
 
-        let sowClass=""
-        let transplantClass=""
+            let sowClass = ""
+            let transplantClass = ""
 
-        if(c.sowing_done){
-            sowClass="green"
-        }
-        else if(week == c.sowing_week){
-            sowClass="yellow"
-        }
-        else if(week > c.sowing_week){
-            sowClass="red"
-        }
+            if (c.sowing_done) {
+                sowClass = "green"
+            } else if (week == c.sowing_week) {
+                sowClass = "yellow"
+            } else if (week > c.sowing_week) {
+                sowClass = "red"
+            }
 
-        if(c.transplanting_done){
-            transplantClass="green"
-        }
-        else if(week == c.grow_start){
-            transplantClass="yellow"
-        }
-        else if(week > c.grow_start){
-            transplantClass="red"
-        }
+            if (c.transplanting_done) {
+                transplantClass = "green"
+            } else if (week == c.grow_start) {
+                transplantClass = "yellow"
+            } else if (week > c.grow_start) {
+                transplantClass = "red"
+            }
 
-        const tr = document.createElement("tr")
+            const tr = document.createElement("tr")
 
-        tr.innerHTML = `
+            tr.innerHTML = `
 
 <td class="location" onclick="openCalendar()">
 ${c.block} •
@@ -223,52 +219,52 @@ ${c.grow_start || ""}
 </div>
 </td>
 `
-        tbody.appendChild(tr)
-    })
-}
-
-function sortBy(field){
-
-    if(currentSort === field){
-        asc = !asc
-    } else {
-        asc = true
+            tbody.appendChild(tr)
+        })
     }
 
-    currentSort = field
+    function sortBy(field) {
 
-    crops.sort((a,b)=>{
-
-        let v1 = a[field]
-        let v2 = b[field]
-
-        if(v1 === undefined) return 1
-        if(v2 === undefined) return -1
-
-        if(typeof v1 === "string"){
-            return asc ? v1.localeCompare(v2) : v2.localeCompare(v1)
+        if (currentSort === field) {
+            asc = !asc
+        } else {
+            asc = true
         }
 
-        return asc ? v1 - v2 : v2 - v1
+        currentSort = field
+
+        crops.sort((a, b) => {
+
+            let v1 = a[field]
+            let v2 = b[field]
+
+            if (v1 === undefined) return 1
+            if (v2 === undefined) return -1
+
+            if (typeof v1 === "string") {
+                return asc ? v1.localeCompare(v2) : v2.localeCompare(v1)
+            }
+
+            return asc ? v1 - v2 : v2 - v1
+        })
+
+        render(crops)
+    }
+
+    document.querySelectorAll("th[data-sort]").forEach(th => {
+        th.onclick = () => sortBy(th.dataset.sort)
     })
 
+    function openItkCrop(name) {
+        const encoded = encodeURIComponent(name)
+        window.location.href = `itk.html?crop=${encoded}`
+    }
+
+    function openCalendar() {
+        window.location.href = `calendrier.html`
+    }
+
     render(crops)
-}
-
-document.querySelectorAll("th[data-sort]").forEach(th=>{
-    th.onclick = ()=> sortBy(th.dataset.sort)
-})
-
-function openItkCrop(name){
-    const encoded = encodeURIComponent(name)
-    window.location.href = `itk.html?crop=${encoded}`
-}
-
-function openCalendar(){
-    window.location.href = `calendrier.html`
-}
-
-render(crops)
 
 </script>
 

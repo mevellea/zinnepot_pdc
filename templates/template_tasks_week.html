@@ -1,136 +1,145 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Planning cultures</title>
+    <title>Planning cultures</title>
 
-<style>
-body{
-    font-family:system-ui,-apple-system,Segoe UI,Roboto;
-    margin:0;
-    background:#f4f6f8;
-}
+    <style>
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto;
+            margin: 0;
+            background: #f4f6f8;
+        }
 
-.container{
-    background:#2e7d32;
-    padding:10px;
-}
+        .container {
+            background: #2e7d32;
+            padding: 10px;
+        }
 
-.section-title{
-    color:white;
-    font-weight:600;
-    margin:10px 5px;
-}
+        .section-title {
+            color: white;
+            font-weight: 600;
+            margin: 10px 5px;
+        }
 
-table{
-    width:100%;
-    border-collapse:collapse;
-    background:white;
-    border-radius:10px;
-    overflow:hidden;
-    margin-bottom:20px;
-}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
 
-th, td{
-    padding:8px;
-    font-size:13px;
-    text-align:center;
-}
+        th, td {
+            padding: 8px;
+            font-size: 13px;
+            text-align: center;
+        }
 
-th{
-    background:#e8f5e9;
-}
+        th {
+            background: #e8f5e9;
+        }
 
-td{
-    border-top:1px solid #eee;
-}
+        td {
+            border-top: 1px solid #eee;
+        }
 
-.green{ background:#BADE1B; }
-.yellow{ background:#EBDE4D; }
-.red{ background:#E8978B; }
+        .green {
+            background: #BADE1B;
+        }
 
-.timeline{
-    position:relative;
-    height:10px;
-    background:#eee;
-    border-radius:6px;
-}
+        .yellow {
+            background: #EBDE4D;
+        }
 
-.grow{
-    position:absolute;
-    height:10px;
-    background:#66bb6a;
-    border-radius:6px;
-}
+        .red {
+            background: #E8978B;
+        }
 
-.harvest{
-    position:absolute;
-    height:10px;
-    background:#2e7d32;
-    border-radius:6px;
-}
-.location{
-    cursor:pointer;
-    font-weight:600;
-}
+        .timeline {
+            position: relative;
+            height: 10px;
+            background: #eee;
+            border-radius: 6px;
+        }
 
-.location:hover{
-    text-decoration:underline;
-}
+        .grow {
+            position: absolute;
+            height: 10px;
+            background: #66bb6a;
+            border-radius: 6px;
+        }
 
-.itk{
-    cursor:pointer;
-    font-weight:600;
-}
+        .harvest {
+            position: absolute;
+            height: 10px;
+            background: #2e7d32;
+            border-radius: 6px;
+        }
 
-.itk:hover{
-    text-decoration:underline;
-}
+        .location {
+            cursor: pointer;
+            font-weight: 600;
+        }
 
-.small{
-    font-size:12px;
-    color:#555;
-}
+        .location:hover {
+            text-decoration: underline;
+        }
 
-.nav-buttons{
-    width:100%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:12px;
-    margin:16px 0;
-}
+        .itk {
+            cursor: pointer;
+            font-weight: 600;
+        }
 
-.nav-btn{
-    border:none;
-    padding:8px 14px;
-    border-radius:20px;
-    background:white;
-    cursor:pointer;
-    font-weight:600;
-    box-shadow:0 2px 4px rgba(0,0,0,0.1);
-    transition:all 0.2s;
-}
+        .itk:hover {
+            text-decoration: underline;
+        }
 
-.nav-wrapper{
-    display:flex;
-    justify-content:center;
-    width:100%;
-}
+        .small {
+            font-size: 12px;
+            color: #555;
+        }
 
-.nav-btn:hover{
-    transform:translateY(-1px);
-    box-shadow:0 4px 8px rgba(0,0,0,0.15);
-}
+        .nav-buttons {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin: 16px 0;
+        }
 
-.nav-btn.current{
-    background:#2e7d32;
-    color:white;
-}
+        .nav-btn {
+            border: none;
+            padding: 8px 14px;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+        }
 
-</style>
+        .nav-wrapper {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-btn.current {
+            background: #2e7d32;
+            color: white;
+        }
+
+    </style>
 </head>
 
 <body>
@@ -145,138 +154,138 @@ td{
 
 <div class="container">
 
-<div class="section-title">⏱ En retard</div>
-<table>
-<thead>
-<tr>
-<th>Planche</th>
-<th>Culture</th>
-<th>Semis</th>
-<th>Transplant</th>
-<th>Calendrier</th>
-</tr>
-</thead>
-<tbody id="late-body"></tbody>
-</table>
+    <div class="section-title">⏱ En retard</div>
+    <table>
+        <thead>
+        <tr>
+            <th>Planche</th>
+            <th>Culture</th>
+            <th>Semis</th>
+            <th>Transplant</th>
+            <th>Calendrier</th>
+        </tr>
+        </thead>
+        <tbody id="late-body"></tbody>
+    </table>
 
 
-<div class="section-title" id="current-section-title"></div>
-<table>
-<thead>
-<tr>
-<th>Planche</th>
-<th>Culture</th>
-<th>Semis</th>
-<th>Transplant</th>
-<th>Calendrier</th>
-</tr>
-</thead>
-<tbody id="current-body"></tbody>
-</table>
+    <div class="section-title" id="current-section-title"></div>
+    <table>
+        <thead>
+        <tr>
+            <th>Planche</th>
+            <th>Culture</th>
+            <th>Semis</th>
+            <th>Transplant</th>
+            <th>Calendrier</th>
+        </tr>
+        </thead>
+        <tbody id="current-body"></tbody>
+    </table>
 
 </div>
 
 <script>
 
-const crops = __DATA__
+    const crops = __DATA__
 
-let currentWeek = new Date()
-const onejan = new Date(currentWeek.getFullYear(),0,1)
+    let currentWeek = new Date()
+    const onejan = new Date(currentWeek.getFullYear(), 0, 1)
 
-function getWeekFromDate(d){
-    return Math.ceil((((d - onejan) / 86400000) + onejan.getDay()+1)/7)
-}
-
-let displayedWeek = getWeekFromDate(currentWeek)
-
-const minWeek = 10
-const maxWeek = 48
-const span = maxWeek - minWeek
-
-function percent(w){
-    return ((w-minWeek)/span)*100
-}
-
-function updateCurrentWeekButton(){
-    const current = getWeekFromDate(new Date())
-    const btn = document.getElementById("current-week-btn")
-
-    btn.innerText = `Semaine ${current}`
-
-    if(displayedWeek !== current){
-        btn.style.opacity = "1"
-    } else {
-        btn.style.opacity = "0.6"
-    }
-}
-
-function updateSectionTitle(){
-    document.getElementById("current-section-title").innerText =
-        `🔥 A faire semaine ${displayedWeek}`
-}
-
-function getState(c){
-    if(
-        (c.sowing_week && displayedWeek > c.sowing_week) ||
-        (c.grow_start && displayedWeek > c.grow_start)
-    ){
-        return "planning_late"
+    function getWeekFromDate(d) {
+        return Math.ceil((((d - onejan) / 86400000) + onejan.getDay() + 1) / 7)
     }
 
-    if(
-        displayedWeek === c.sowing_week ||
-        displayedWeek === c.grow_start
-    ){
-        return "planning_current"
+    let displayedWeek = getWeekFromDate(currentWeek)
+
+    const minWeek = 10
+    const maxWeek = 48
+    const span = maxWeek - minWeek
+
+    function percent(w) {
+        return ((w - minWeek) / span) * 100
     }
 
-    return null
-}
+    function updateCurrentWeekButton() {
+        const current = getWeekFromDate(new Date())
+        const btn = document.getElementById("current-week-btn")
 
-function jumpToWeek(w){
-    displayedWeek = w
-    render()
-}
+        btn.innerText = `Semaine ${current}`
 
-function updateWeekLabel(){
-    document.getElementById("week-label").innerText = `Semaine ${displayedWeek}`
-}
+        if (displayedWeek !== current) {
+            btn.style.opacity = "1"
+        } else {
+            btn.style.opacity = "0.6"
+        }
+    }
 
-function nextWeek(){
-    displayedWeek++
-    render()
-}
+    function updateSectionTitle() {
+        document.getElementById("current-section-title").innerText =
+            `🔥 A faire semaine ${displayedWeek}`
+    }
 
-function prevWeek(){
-    displayedWeek--
-    render()
-}
+    function getState(c) {
+        if (
+            (c.sowing_week && displayedWeek > c.sowing_week) ||
+            (c.grow_start && displayedWeek > c.grow_start)
+        ) {
+            return "planning_late"
+        }
 
-function resetWeek(){
-    displayedWeek = getWeekFromDate(new Date())
-    render()
-}
+        if (
+            displayedWeek === c.sowing_week ||
+            displayedWeek === c.grow_start
+        ) {
+            return "planning_current"
+        }
 
-function renderRow(c){
+        return null
+    }
 
-    const growLeft = percent(c.grow_start)
-    const growWidth = percent(c.grow_end) - growLeft
+    function jumpToWeek(w) {
+        displayedWeek = w
+        render()
+    }
 
-    const harvestLeft = percent(c.harvest_start)
-    const harvestWidth = percent(c.harvest_end) - harvestLeft
+    function updateWeekLabel() {
+        document.getElementById("week-label").innerText = `Semaine ${displayedWeek}`
+    }
 
-    let sowClass=""
-    let transplantClass=""
+    function nextWeek() {
+        displayedWeek++
+        render()
+    }
 
-    if(c.sowing_done) sowClass="green"
-    else if(displayedWeek == c.sowing_week) sowClass="yellow"
-    else if(displayedWeek > c.sowing_week) sowClass="red"
+    function prevWeek() {
+        displayedWeek--
+        render()
+    }
 
-    if(c.transplanting_done) transplantClass="green"
-    else if(displayedWeek == c.grow_start) transplantClass="yellow"
-    else if(displayedWeek > c.grow_start) transplantClass="red"
+    function resetWeek() {
+        displayedWeek = getWeekFromDate(new Date())
+        render()
+    }
 
-    return `
+    function renderRow(c) {
+
+        const growLeft = percent(c.grow_start)
+        const growWidth = percent(c.grow_end) - growLeft
+
+        const harvestLeft = percent(c.harvest_start)
+        const harvestWidth = percent(c.harvest_end) - harvestLeft
+
+        let sowClass = ""
+        let transplantClass = ""
+
+        if (c.sowing_done) sowClass = "green"
+        else if (displayedWeek == c.sowing_week) sowClass = "yellow"
+        else if (displayedWeek > c.sowing_week) sowClass = "red"
+
+        if (c.transplanting_done) transplantClass = "green"
+        else if (displayedWeek == c.grow_start) transplantClass = "yellow"
+        else if (displayedWeek > c.grow_start) transplantClass = "red"
+
+        return `
 <tr>
 <td class="location" onclick="openCalendar()">
 ${c.block} •
@@ -302,54 +311,54 @@ ${c.grow_start || ""}
 </div>
 </td>
 </tr>`
-}
+    }
 
-function isLate(c){
-    return (
-        (c.sowing_week && !c.sowing_done && displayedWeek > c.sowing_week) ||
-        (c.grow_start && !c.transplanting_done && displayedWeek > c.grow_start)
-    )
-}
+    function isLate(c) {
+        return (
+            (c.sowing_week && !c.sowing_done && displayedWeek > c.sowing_week) ||
+            (c.grow_start && !c.transplanting_done && displayedWeek > c.grow_start)
+        )
+    }
 
-function isCurrent(c){
-    return (
-        (c.sowing_week && !c.sowing_done && displayedWeek === c.sowing_week) ||
-        (c.grow_start && !c.transplanting_done && displayedWeek === c.grow_start)
-    )
-}
+    function isCurrent(c) {
+        return (
+            (c.sowing_week && !c.sowing_done && displayedWeek === c.sowing_week) ||
+            (c.grow_start && !c.transplanting_done && displayedWeek === c.grow_start)
+        )
+    }
 
-function openItkCrop(name){
-    const encoded = encodeURIComponent(name)
-    window.location.href = `itk.html?crop=${encoded}`
-}
+    function openItkCrop(name) {
+        const encoded = encodeURIComponent(name)
+        window.location.href = `itk.html?crop=${encoded}`
+    }
 
-function openCalendar(){
-    window.location.href = `calendrier.html`
-}
+    function openCalendar() {
+        window.location.href = `calendrier.html`
+    }
 
-function render(){
-    updateCurrentWeekButton()
-    updateSectionTitle()
+    function render() {
+        updateCurrentWeekButton()
+        updateSectionTitle()
 
-    const late = []
-    const current = []
+        const late = []
+        const current = []
 
-    crops.forEach(c => {
-        if(isLate(c)){
-            late.push(c)
-        } else if(isCurrent(c)){
-            current.push(c)
-        }
-    })
+        crops.forEach(c => {
+            if (isLate(c)) {
+                late.push(c)
+            } else if (isCurrent(c)) {
+                current.push(c)
+            }
+        })
 
-    document.getElementById("late-body").innerHTML =
-        late.map(renderRow).join("")
+        document.getElementById("late-body").innerHTML =
+            late.map(renderRow).join("")
 
-    document.getElementById("current-body").innerHTML =
-        current.map(renderRow).join("")
-}
+        document.getElementById("current-body").innerHTML =
+            current.map(renderRow).join("")
+    }
 
-render()
+    render()
 
 </script>
 

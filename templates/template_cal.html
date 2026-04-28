@@ -1,118 +1,119 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, Arial;
+            background: #eaf4fb; /* bleu clair */
+            margin: 0;
+            padding: 10px;
+        }
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+        h1 {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
 
-<style>
+        /* SCROLL horizontal mobile */
+        .wrapper {
+            overflow-x: auto;
+        }
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, Arial;
-    background: #eaf4fb; /* bleu clair */
-    margin: 0;
-    padding: 10px;
-}
+        /* TABLE */
+        table {
+            border-collapse: collapse;
+            margin: auto;
+            background: white;
+            font-size: 12px;
+        }
 
-h1 {
-    text-align: center;
-    font-size: 18px;
-    margin-bottom: 10px;
-}
+        /* CELLULES */
+        th, td {
+            border: 1px solid #ddd;
+            text-align: center;
+            min-width: 32px;
+            height: 36px;
+            position: relative;
+        }
 
-/* SCROLL horizontal mobile */
-.wrapper {
-    overflow-x: auto;
-}
+        /* alternance par garden */
+        .row-garden-a td {
+            background: #f8fbff;
+        }
 
-/* TABLE */
-table {
-    border-collapse: collapse;
-    margin: auto;
-    background: white;
-    font-size: 12px;
-}
+        .row-garden-b td {
+            background: #eef6fd;
+        }
 
-/* CELLULES */
-th, td {
-    border: 1px solid #ddd;
-    text-align: center;
-    min-width: 32px;
-    height: 36px;
-    position: relative;
-}
+        /* HEADER */
+        th {
+            background: #2c3e50;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
 
-/* alternance par garden */
-.row-garden-a td {
-    background: #f8fbff;
-}
+        /* ligne semaines */
+        .header-weeks th {
+            top: 0;
+        }
 
-.row-garden-b td {
-    background: #eef6fd;
-}
+        /* ligne mois */
+        .header-months th {
+            top: 32px; /* hauteur ligne semaines */
+            z-index: 4;
+        }
 
-/* HEADER */
-th {
-    background: #2c3e50;
-    color: white;
-    position: sticky;
-    top: 0;
-    z-index: 5;
-}
+        /* COLONNES FIXES */
+        .sticky {
+            position: sticky;
+            left: 0;
+            background: #d6eaf8;
+            z-index: 6;
+            font-weight: bold;
+        }
 
-/* ligne semaines */
-.header-weeks th {
-    top: 0;
-}
+        /* décalage sticky
+        .sticky.garden { left: 60px; }
+        .sticky.bed { left: 120px; }
+         */
+        /* mois */
+        .month {
+            background: #5dade2;
+            color: white;
+            font-size: 10px;
+        }
 
-/* ligne mois */
-.header-months th {
-    top: 32px; /* hauteur ligne semaines */
-    z-index: 4;
-}
-/* COLONNES FIXES */
-.sticky {
-    position: sticky;
-    left: 0;
-    background: #d6eaf8;
-    z-index: 6;
-    font-weight: bold;
-}
+        /* semaine actuelle */
+        .current {
+            outline: 2px solid #e74c3c;
+        }
 
-/* décalage sticky
-.sticky.garden { left: 60px; }
-.sticky.bed { left: 120px; }
- */
-/* mois */
-.month {
-    background: #5dade2;
-    color: white;
-    font-size: 10px;
-}
+        .crop-bar {
+            position: absolute;
+            left: 2px;
+            right: 2px;
+            border-radius: 4px;
+            font-size: 10px;
+            padding: 2px;
+            white-space: normal; /* 🔥 plus de coupe */
+            word-break: break-word;
+        }
 
-/* semaine actuelle */
-.current {
-    outline: 2px solid #e74c3c;
-}
-.crop-bar {
-    position: absolute;
-    left: 2px;
-    right: 2px;
-    border-radius: 4px;
-    font-size: 10px;
-    padding: 2px;
-    white-space: normal; /* 🔥 plus de coupe */
-    word-break: break-word;
-}
-.grow {
-    background: #abebc6;
-}
-.harvest {
-    background: #27ae60;
-    color: white;
-}
+        .grow {
+            background: #abebc6;
+        }
 
-</style>
+        .harvest {
+            background: #27ae60;
+            color: white;
+        }
+
+    </style>
 </head>
 
 <body>
@@ -120,122 +121,137 @@ th {
 <h1>🌱 Planning cultures</h1>
 
 <div class="wrapper">
-<table id="planning"></table>
+    <table id="planning"></table>
 </div>
 
 <script>
 
-// ===== DATA =====
-const data = {{ data | tojson }};
-const weeks = {{ weeks | tojson }};
-const currentWeek = {{ current_week }};
+    // ===== DATA =====
+    const data = {
+    {
+        data | tojson
+    }
+    }
+    ;
+    const weeks = {
+    {
+        weeks | tojson
+    }
+    }
+    ;
+    const currentWeek = {
+    {
+        current_week
+    }
+    }
+    ;
 
-// ===== UTILS =====
+    // ===== UTILS =====
 
-// approx mois depuis semaine ISO
-function getMonth(week) {
-    const date = new Date(2025, 0, 1 + (week - 1) * 7);
-    return date.toLocaleString('fr-FR', { month: 'short' });
-}
-
-// ===== GROUP BY BED =====
-const grouped = {};
-
-data.forEach(crop => {
-    const key = `${crop.block}|${crop.garden}|${crop.bed}`;
-
-    if (!grouped[key]) {
-        grouped[key] = {
-            block: crop.block,
-            garden: crop.garden,
-            bed: crop.bed,
-            crops: []
-        };
+    // approx mois depuis semaine ISO
+    function getMonth(week) {
+        const date = new Date(2025, 0, 1 + (week - 1) * 7);
+        return date.toLocaleString('fr-FR', {month: 'short'});
     }
 
-    grouped[key].crops.push(crop);
-});
+    // ===== GROUP BY BED =====
+    const grouped = {};
 
-const rows = Object.values(grouped);
+    data.forEach(crop => {
+        const key = `${crop.block}|${crop.garden}|${crop.bed}`;
 
-// ===== TABLE =====
-const table = document.getElementById("planning");
+        if (!grouped[key]) {
+            grouped[key] = {
+                block: crop.block,
+                garden: crop.garden,
+                bed: crop.bed,
+                crops: []
+            };
+        }
 
-// ===== HEADER 1 (weeks) =====
-let header1 = "<tr>";
-header1 += "<th class='sticky'>Bed</th>";
+        grouped[key].crops.push(crop);
+    });
 
-weeks.forEach(w => {
-    header1 += `<th class="${w === currentWeek ? 'current' : ''}">${w}</th>`;
-});
-header1 += "</tr>";
+    const rows = Object.values(grouped);
 
-table.innerHTML += header1;
+    // ===== TABLE =====
+    const table = document.getElementById("planning");
 
-// ===== HEADER 2 (months) =====
-let header2 = "<tr>";
-header2 += "<th class='sticky'></th></th>";
-
-let lastMonth = null;
-
-weeks.forEach(w => {
-    const m = getMonth(w);
-
-    if (m !== lastMonth) {
-        header2 += `<th class="month">${m}</th>`;
-        lastMonth = m;
-    } else {
-        header2 += `<th class="month"></th>`;
-    }
-});
-
-header2 += "</tr>";
-table.innerHTML += header2;
-
-
-// ===== ROWS =====
-rows.forEach(rowData => {
-
-    let row = "<tr>";
-
-    row += `<td class="sticky">${rowData.block}.${rowData.garden}.${rowData.bed}</td>`;
+    // ===== HEADER 1 (weeks) =====
+    let header1 = "<tr>";
+    header1 += "<th class='sticky'>Bed</th>";
 
     weeks.forEach(w => {
-        let cell = `<td class="${w === currentWeek ? 'current' : ''}">`;
+        header1 += `<th class="${w === currentWeek ? 'current' : ''}">${w}</th>`;
+    });
+    header1 += "</tr>";
 
-        // superposer les cultures
-        rowData.crops.forEach((crop, index) => {
-            let topOffset = index * 16; // empilement vertical
-            if (w >= crop.grow_start && w <= crop.harvest_end) {
+    table.innerHTML += header1;
 
-                let cls = "crop-bar grow";
+    // ===== HEADER 2 (months) =====
+    let header2 = "<tr>";
+    header2 += "<th class='sticky'></th></th>";
 
-                if (w >= crop.harvest_start && w <= crop.harvest_end) {
-                    cls = "crop-bar harvest";
-                }
-                // label uniquement au début
-                let label = "";
-                if (w === crop.grow_start) {
-                    label = crop.label;
-                } else if (w >= crop.harvest_start && w <= crop.harvest_end) {
-                    label = "R";
-                } else {
-                    label = "_";
-                }
+    let lastMonth = null;
 
-                cell += `
+    weeks.forEach(w => {
+        const m = getMonth(w);
+
+        if (m !== lastMonth) {
+            header2 += `<th class="month">${m}</th>`;
+            lastMonth = m;
+        } else {
+            header2 += `<th class="month"></th>`;
+        }
+    });
+
+    header2 += "</tr>";
+    table.innerHTML += header2;
+
+
+    // ===== ROWS =====
+    rows.forEach(rowData => {
+
+        let row = "<tr>";
+
+        row += `<td class="sticky">${rowData.block}.${rowData.garden}.${rowData.bed}</td>`;
+
+        weeks.forEach(w => {
+            let cell = `<td class="${w === currentWeek ? 'current' : ''}">`;
+
+            // superposer les cultures
+            rowData.crops.forEach((crop, index) => {
+                let topOffset = index * 16; // empilement vertical
+                if (w >= crop.grow_start && w <= crop.harvest_end) {
+
+                    let cls = "crop-bar grow";
+
+                    if (w >= crop.harvest_start && w <= crop.harvest_end) {
+                        cls = "crop-bar harvest";
+                    }
+                    // label uniquement au début
+                    let label = "";
+                    if (w === crop.grow_start) {
+                        label = crop.label;
+                    } else if (w >= crop.harvest_start && w <= crop.harvest_end) {
+                        label = "R";
+                    } else {
+                        label = "_";
+                    }
+
+                    cell += `
                 <div class="${cls}" style="top:${topOffset}px;">
                     ${label}
                 </div>`;
-            }
+                }
+            });
+            cell += "</td>";
+            row += cell;
         });
-        cell += "</td>";
-        row += cell;
-    });
-    row += "</tr>";
-    table.innerHTML += row;
+        row += "</tr>";
+        table.innerHTML += row;
 
-});
+    });
 
 </script>
 
