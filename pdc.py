@@ -9,12 +9,11 @@ from datetime import datetime
 from openpyxl import load_workbook
 from crop import Crop, load_crops
 import copy
-from shared import ROOT_FOLDER
+from shared import ROOT_FOLDER, EXPORT_FOLDER
 
 from customers import gen_customer_html
 
 INPUT_FILE = ROOT_FOLDER / "PDC.xlsx"
-EXPORT_FOLDER = ROOT_FOLDER / "export"
 ITK_OUTPUT_FILE = EXPORT_FOLDER / "itk.html"
 TASKS_OUTPUT_FILE = EXPORT_FOLDER / "taches.html"
 TASKS_WEEK_OUTPUT_FILE = EXPORT_FOLDER / "taches_semaine.html"

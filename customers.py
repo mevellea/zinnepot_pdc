@@ -2,14 +2,29 @@
 import pandas as pd
 from jinja2 import Environment, FileSystemLoader
 import json
-from shared import ROOT_FOLDER
+from shared import ROOT_FOLDER, EXPORT_FOLDER
 
 TEMPLATE_FILE = "templates/template_cust.html"
 
 
 CUST_INPUT_FILE = ROOT_FOLDER / "Auto-cueillette Haren (Responses).xlsx"
 CUST_DATA_FILE = ROOT_FOLDER / "cueilleurs.xlsx"
-CUST_OUTPUT_FILE = ROOT_FOLDER / "export" / "clients.html"
+CUST_OUTPUT_FILE = EXPORT_FOLDER / "clients.html"
+
+
+def clean_phone(x):
+    if pd.isna(x):
+        return ""
+    # Convert float like 32471234567.0 → "32471234567"
+    s = str(int(x)) if isinstance(x, float) else str(x)
+    s = s.strip().replace(" ", "").replace(".", "")
+    # Remove country code 32 if present
+    if s.startswith("32"):
+        s = s[2:]
+    # Ensure leading 0
+    if not s.startswith("0"):
+        s = "0" + s
+    return s
 
 
 def load_data():
@@ -18,6 +33,7 @@ def load_data():
     df.index = df.index.str.strip()
     df.drop(df.tail(2).index, inplace=True)  # drop last 2 rows
     df.columns = [c.strip() for c in df.columns]
+    df["Numéro de téléphone"] = df["Numéro de téléphone"].apply(clean_phone)
 
     df = df.rename(columns={
         "Comment avez-vous entendu parler du projet d'auto-cueillette de l'Asbl Zinnepot ?": "Source",
@@ -32,6 +48,9 @@ def load_data():
         "Nombre d'adultes du foyer": "Nb adultes",
         "Jours préférés pour la cueillette": "Jours préférés",
         "Comment voulez-vous payer l'abonnement ?": "Mode paiement",
+        "Nom et prénom": "Nom",
+        "Numéro de téléphone": "Téléphone",
+        "Adresse courriel": "Courriel",
         }
     )
     # ✅ Conversion timestamps / dates
@@ -91,7 +110,7 @@ def split_fields(record):
     for k, v in record.items():
         key = k.lower()
 
-        if any(x in key for x in ["date", "time", "prénom", "règles", "objets"]):
+        if any(x in key for x in ["date", "time", "nom", "règles", "objets"]):
             pass
         elif any(x in key for x in ["nombre", "nb", "prix", "adresse", "ages", "infos", "abonnement"]):
             col1[k] = v
@@ -125,3 +144,19 @@ def gen_customer_html():
     with open(CUST_OUTPUT_FILE, "w", encoding="utf-8") as f:
         f.write(html)
     print("HTML generated :", CUST_OUTPUT_FILE)
+
+    # Filter lists
+    phone_df = df[df["Comm"].str.contains("Whatsapp", case=False)]
+    email_df = df[df["Comm"].str.contains("Courriel", case=False)]
+
+    contact_list = [f"{name}, {row['Téléphone']}, {row['Courriel']}" for name, row in df.iterrows()]
+    phone_list = [f"{name}: {row['Téléphone']}" for name, row in phone_df.iterrows()]
+    mailing_list = [f"{name} <{row['Courriel']}>" for name, row in email_df.iterrows()]
+
+    with open(EXPORT_FOLDER / "contact_list.csv", "w", encoding="utf-8") as f:
+        f.write("Name, Phone, Email\n")
+        f.write("\n".join(contact_list))
+    with open(EXPORT_FOLDER / "phone_list.txt", "w", encoding="utf-8") as f:
+        f.write("\n".join(phone_list))
+    with open(EXPORT_FOLDER / "mailing_list.txt", "w", encoding="utf-8") as f:
+        f.write("\n".join(mailing_list))
